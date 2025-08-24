@@ -20,8 +20,21 @@ app.use(cors({
 }))
 app.use(express.json())
 
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => {
+    console.log('Connected to MongoDB')
+  })
+  .catch((err) => {
+    console.error('MongoDB connection error:', err.message)
+  })
+
+// Import Clerk routes
+const clerkRoutes = require('./src/routes/clerkRoutes')
+
 // Routes
 app.use('/api/auth', authRoutes)
+app.use('/api/clerk', clerkRoutes)
 app.use('/api', paymentRoutes)
 
 // Start server first

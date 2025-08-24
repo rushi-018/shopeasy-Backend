@@ -1,3 +1,4 @@
+require('dotenv').config()
 const express = require('express')
 const { errorHandler } = require('./middleware/errorHandler')
 const uploadRoutes = require('./routes/upload')
@@ -7,12 +8,24 @@ const productRoutes = require('./routes/products')
 const storeRoutes = require('./routes/stores')
 const authRoutes = require('./routes/auth')
 const webScraperRoutes = require('./routes/webScraperRoutes')
+const cartRoutes = require('./routes/cart')
+const clerkRoutes = require('./routes/clerkRoutes')
+const orderRoutes = require('./routes/orders')
+const wishlistRoutes = require('./routes/wishlist')
 
 console.log('🚀 Starting server...')
 console.log('🔧 Environment:', process.env.NODE_ENV || 'development')
 
-// Database connection disabled for now
-console.log('📊 MongoDB connection disabled - server running without database')
+// Connect to MongoDB
+const connectDB = require('./config/db')
+const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/shopeasy'
+console.log('📊 Attempting to connect to MongoDB with URI:', mongoURI.replace(/:([^:@]+)@/, ':****@'))
+connectDB()
+  .then(() => console.log('📊 MongoDB connected successfully'))
+  .catch(err => {
+    console.error('📊 MongoDB connection error:', err.message)
+    console.warn('⚠️ Continuing without database connection - some features will be unavailable')
+  })
 
 const app = express()
 
@@ -97,15 +110,41 @@ app.get('/api/scraper/test', (req, res) => {
 
 // Routes
 app.use('/api/auth', authRoutes)
+app.use('/api/clerk', clerkRoutes)
 app.use('/api/products', productRoutes)
 app.use('/api/stores', storeRoutes)
 app.use('/api/upload', uploadRoutes)
 app.use('/api/profile', profileRoutes)
 app.use('/api', paymentRoutes)
 app.use('/api/scraper', webScraperRoutes)
+app.use('/api/cart', cartRoutes)
+app.use('/api/orders', orderRoutes)
+app.use('/api/wishlist', wishlistRoutes)
 
 // Error Handler
 app.use(errorHandler)
 
+// Start the server if not being imported for serverless
+if (require.main === module) {
+  const PORT = process.env.PORT || 5000
+  const server = app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`)
+    console.log(`🌎 API available at http://localhost:${PORT}/api`)
+    console.log(`🧪 Health check: http://localhost:${PORT}/api/health`)
+  }).on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      const newPort = PORT + 1
+      console.log(`⚠️ Port ${PORT} is in use, trying port ${newPort}`)
+      const newServer = app.listen(newPort, () => {
+        console.log(`🚀 Server running on alternate port ${newPort}`)
+        console.log(`🌎 API available at http://localhost:${newPort}/api`)
+        console.log(`🧪 Health check: http://localhost:${newPort}/api/health`)
+      })
+    } else {
+      console.error('❌ Server failed to start:', err)
+    }
+  })
+}
+
 // Export serverless function handler for Vercel
-module.exports = (req, res) => app(req, res)
+module.exports = app

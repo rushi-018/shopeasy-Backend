@@ -6,7 +6,7 @@ class WebScraperService {
   constructor() {
     this.browser = null;
     this.isInitialized = false;
-    this.isScrapingEnabled = true;
+    this.isScrapingEnabled = false; // Temporarily disabled due to Node.js compatibility issues
     this.rateLimitDelay = 2000; // Increased to 2 seconds
     this.lastRequestTime = 0;
     this.userAgents = [

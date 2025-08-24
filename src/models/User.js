@@ -14,7 +14,15 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true
+    required: function() {
+      // Password only required if no clerkId
+      return !this.clerkId;
+    }
+  },
+  clerkId: {
+    type: String,
+    sparse: true,
+    unique: true
   },
   role: {
     type: String,

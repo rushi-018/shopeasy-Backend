@@ -61,11 +61,11 @@ exports.verifyPayment = async (req, res) => {
       .digest('hex')
     
     if (generated_signature === razorpay_signature) {
-      // Payment is successful
-      res.json({ success: true })
+      // Payment is successful - let client persist order via /api/orders
+      res.json({ success: true, verified: true })
     } else {
       // Payment verification failed
-      res.json({ success: false })
+      res.json({ success: false, verified: false })
     }
   } catch (error) {
     console.error('Error verifying payment:', error)

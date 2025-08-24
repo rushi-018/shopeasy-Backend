@@ -1,7 +1,8 @@
 const express = require('express')
 const router = express.Router()
 const productController = require('../controllers/productController')
-const { protect } = require('../middleware/auth')
+const { requireAuth } = require('../middleware/clerk')
+const { requireRole, attachDbUser } = require('../middleware/roles')
 
 // Get all products
 router.get('/', productController.getProducts)
@@ -16,7 +17,7 @@ router.get('/:id/prices', productController.getProductPrices)
 router.get('/:id/local-shops', productController.getLocalShops)
 
 // Protected routes
-router.post('/', protect, productController.createProduct)
-router.put('/:id', protect, productController.updateProduct)
+router.post('/', requireAuth, attachDbUser, requireRole('store_owner'), productController.createProduct)
+router.put('/:id', requireAuth, attachDbUser, requireRole('store_owner'), productController.updateProduct)
 
 module.exports = router 

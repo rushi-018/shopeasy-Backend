@@ -66,7 +66,7 @@ const storeController = {
 
   registerStore: async (req, res) => {
     try {
-      const user = await User.findById(req.user._id)
+  const user = req.dbUser || await User.findById(req.user?._id)
 
       if (user.role !== 'store_owner') {
         res.status(403)
@@ -80,7 +80,7 @@ const storeController = {
 
       const store = new Store({
         ...req.body,
-        owner: req.user._id,
+  owner: user._id,
         verificationDocuments: user.businessDetails.documents
       })
 
@@ -101,8 +101,10 @@ const storeController = {
         throw new Error('Store not found')
       }
 
-      if (store.owner.toString() !== req.user._id.toString() && 
-          req.user.role !== 'admin') {
+    const userId = (req.dbUser?._id || req.user?._id).toString()
+    const userRole = req.dbUser?.role || req.user?.role
+    if (store.owner.toString() !== userId && 
+      userRole !== 'admin') {
         res.status(403)
         throw new Error('Not authorized to update this store')
       }
@@ -132,7 +134,7 @@ const storeController = {
       const { rating, comment } = req.body
 
       const review = {
-        user: req.user._id,
+  user: (req.dbUser?._id || req.user?._id),
         rating,
         comment
       }
@@ -158,7 +160,7 @@ const storeController = {
         throw new Error('Store not found')
       }
 
-      if (store.owner.toString() !== req.user._id.toString()) {
+  if (store.owner.toString() !== (req.dbUser?._id || req.user?._id).toString()) {
         res.status(403)
         throw new Error('Not authorized to add deals')
       }
@@ -181,7 +183,7 @@ const storeController = {
         throw new Error('Store not found')
       }
 
-      if (store.owner.toString() !== req.user._id.toString()) {
+  if (store.owner.toString() !== (req.dbUser?._id || req.user?._id).toString()) {
         res.status(403)
         throw new Error('Not authorized to update inventory')
       }
@@ -220,7 +222,7 @@ const storeController = {
         throw new Error('Store not found')
       }
 
-      if (store.owner.toString() !== req.user._id.toString()) {
+  if (store.owner.toString() !== (req.dbUser?._id || req.user?._id).toString()) {
         res.status(403)
         throw new Error('Not authorized to view analytics')
       }
@@ -241,7 +243,7 @@ const storeController = {
         throw new Error('Store not found')
       }
 
-      if (store.owner.toString() !== req.user._id.toString()) {
+  if (store.owner.toString() !== (req.dbUser?._id || req.user?._id).toString()) {
         res.status(403)
         throw new Error('Not authorized to update settings')
       }

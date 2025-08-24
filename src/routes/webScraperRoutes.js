@@ -8,7 +8,8 @@ const {
   searchFlipkartProducts,
   getScraperStatus,
   toggleScrapingMode,
-  healthCheck
+  healthCheck,
+  checkScrapingEnabled
 } = require('../controllers/webScraperController');
 
 // Set CORS helper
