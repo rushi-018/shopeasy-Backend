@@ -3,6 +3,7 @@ node_modules/
 
 # Environment files
 .env
+.env.*
 .env.local
 .env.development
 .env.production
@@ -34,3 +35,4 @@ Thumbs.db
 # Temp files
 tmp/
 temp/
+coverage/
